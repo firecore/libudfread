@@ -87,13 +87,9 @@ static int _def_close(udfread_block_input *p_gen)
 static uint32_t _def_size(udfread_block_input *p_gen)
 {
     default_block_input *p = (default_block_input *)p_gen;
-    off_t saved_pos;
     off_t pos;
 
-    saved_pos = lseek(p->fd, 0, SEEK_CUR);
     pos = lseek(p->fd, 0, SEEK_END);
-    saved_pos = lseek(p->fd, saved_pos, SEEK_SET);
-
     if (pos < 0) {
         return 0;
     }
