@@ -768,7 +768,7 @@ static struct file_entry *_read_file_entry(udfread *udf,
                                            const struct long_ad *icb)
 {
     struct file_entry *fe = NULL;
-    int32_t   num_blocks = (icb->length + UDF_BLOCK_SIZE - 1) / UDF_BLOCK_SIZE;
+    uint32_t  num_blocks = (icb->length + UDF_BLOCK_SIZE - 1) / UDF_BLOCK_SIZE;
     uint8_t  *buf;
     int       tag_id;
 
@@ -850,7 +850,7 @@ static int _parse_dir(const uint8_t *data, uint32_t length, struct udf_dir *dir)
 
 static struct udf_dir *_read_dir_file(udfread *udf, const struct long_ad *loc)
 {
-    int32_t         num_blocks = (loc->length + UDF_BLOCK_SIZE - 1) / UDF_BLOCK_SIZE;
+    uint32_t        num_blocks = (loc->length + UDF_BLOCK_SIZE - 1) / UDF_BLOCK_SIZE;
     uint8_t        *data;
     struct udf_dir *dir = NULL;
 
