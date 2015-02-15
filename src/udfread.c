@@ -773,6 +773,9 @@ static struct file_entry *_read_file_entry(udfread *udf,
     int       tag_id;
 
     udf_trace("file entry size %u bytes\n", icb->length);
+    if (num_blocks < 1) {
+        return NULL;
+    }
 
     buf = malloc(num_blocks * UDF_BLOCK_SIZE);
     if (!buf) {
@@ -850,6 +853,10 @@ static struct udf_dir *_read_dir_file(udfread *udf, const struct long_ad *loc)
     int32_t         num_blocks = (loc->length + UDF_BLOCK_SIZE - 1) / UDF_BLOCK_SIZE;
     uint8_t        *data;
     struct udf_dir *dir = NULL;
+
+    if (num_blocks < 1) {
+        return NULL;
+    }
 
     data = malloc(num_blocks * UDF_BLOCK_SIZE);
     if (!data) {
