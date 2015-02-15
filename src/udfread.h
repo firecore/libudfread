@@ -272,7 +272,7 @@ int64_t udfread_file_seek (UDFFILE *, int64_t pos, int whence);
 
 
 #ifdef __cplusplus
-};
+} /* extern "C" */
 #endif
 
 #endif /* UDFREAD_H_ */

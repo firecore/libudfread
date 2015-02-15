@@ -46,4 +46,8 @@ struct udfread_block_input {
 };
 
 
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
 #endif /* UDFREAD_BLOCKINPUT_H_ */
