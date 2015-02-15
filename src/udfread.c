@@ -190,6 +190,7 @@ static char *_cs0_to_utf8(const uint8_t *cs0, size_t size)
         break;
     default:
         udf_error("unregonized string encoding %u\n", cs0[0]);
+        free(out);
         return NULL;
     }
 
