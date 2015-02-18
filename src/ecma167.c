@@ -86,7 +86,7 @@ enum tag_identifier decode_descriptor_tag(const uint8_t *buf)
       return ECMA_TAG_NONE;
   }
 
-  return id;
+  return (enum tag_identifier)id;
 }
 
 /* Primary Volume Descriptor (ECMA 167, 3/10.1) */
@@ -267,9 +267,9 @@ static struct file_entry *_decode_file_entry(const uint8_t *p, size_t size,
     }
 
     if (content_inline) {
-        fe = calloc(1, sizeof(struct file_entry) + l_ad);
+        fe = (struct file_entry *)calloc(1, sizeof(struct file_entry) + l_ad);
     } else {
-        fe = calloc(1, sizeof(struct file_entry) + sizeof(struct long_ad) * (num_ad - 1));
+        fe = (struct file_entry *)calloc(1, sizeof(struct file_entry) + sizeof(struct long_ad) * (num_ad - 1));
     }
 
     if (!fe) {

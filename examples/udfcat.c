@@ -29,14 +29,14 @@ static void _cat(UDFFILE *fp)
 {
     uint8_t buf[2048];
     int64_t got = 0;
-    int64_t result;
+    ssize_t result;
 
     while ((result = udfread_file_read(fp, buf, sizeof(buf))) > 0) {
-        fwrite(buf, 1, result, stdout);
+        fwrite(buf, 1, (size_t)result, stdout);
         got += result;
     }
 
-    if (got < 0) {
+    if (result < 0) {
         fprintf(stderr, "udfread_file_read(offset=%"PRId64") failed\n", udfread_file_tell(fp));
     }
     fprintf(stderr, "wrote %"PRId64" bytes of %"PRId64"\n", got, udfread_file_size(fp));

@@ -126,7 +126,7 @@ static int _def_read(udfread_block_input *p_gen, uint32_t lba, void *buf, uint32
 
 udfread_block_input *block_input_new(const char *path)
 {
-    default_block_input *p = calloc(1, sizeof(default_block_input));
+    default_block_input *p = (default_block_input*)calloc(1, sizeof(default_block_input));
     if (!p) {
         return NULL;
     }

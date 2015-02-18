@@ -108,7 +108,7 @@ static int atomic_pointer_compare_and_exchange(void *atomic, void *oldval, void 
 static char *_str_dup(const char *s)
 {
     size_t len = strlen(s);
-    char *p = malloc(len + 1);
+    char *p = (char *)malloc(len + 1);
     if (p) {
         memcpy(p, s, len + 1);
     } else {
@@ -138,7 +138,7 @@ static void *_safe_realloc(void *p, size_t s)
       out[out_pos++] = ch;                          \
     } else {                                        \
       out_size++;                                   \
-      out = _safe_realloc(out, out_size);           \
+      out = (uint8_t *)_safe_realloc(out, out_size);\
       if (!out) return NULL;                        \
                                                     \
       out[out_pos++] = 0xc0 | (ch >> 6);            \
@@ -152,7 +152,7 @@ static void *_safe_realloc(void *p, size_t s)
       utf16lo_to_utf8(out, out_pos, out_size, ch);      \
     } else {                                            \
       out_size += 2;                                    \
-      out = _safe_realloc(out, out_size);               \
+      out = (uint8_t *)_safe_realloc(out, out_size);    \
       if (!out) return NULL;                            \
                                                         \
       out[out_pos++] = 0xe0 | (ch >> 12);               \
@@ -168,7 +168,7 @@ static char *_cs0_to_utf8(const uint8_t *cs0, size_t size)
     size_t   out_pos = 0;
     size_t   out_size = size;
     size_t   i;
-    uint8_t *out = malloc(size);
+    uint8_t *out = (uint8_t *)malloc(size);
 
     if (!out) {
         udf_error("out of memory\n");
@@ -687,7 +687,7 @@ udfread *udfread_init(void)
         enable_log = 1;
     }
 
-    return calloc(1, sizeof(udfread));
+    return (udfread *)calloc(1, sizeof(udfread));
 }
 
 /*
@@ -778,7 +778,7 @@ static struct file_entry *_read_file_entry(udfread *udf,
         return NULL;
     }
 
-    buf = malloc(num_blocks * UDF_BLOCK_SIZE);
+    buf = (uint8_t *)malloc(num_blocks * UDF_BLOCK_SIZE);
     if (!buf) {
         udf_error("out of memory\n");
         return NULL;
@@ -822,7 +822,7 @@ static int _parse_dir(const uint8_t *data, uint32_t length, struct udf_dir *dir)
             return -1;
         }
 
-        dir->files = _safe_realloc(dir->files, sizeof(dir->files[0]) * (dir->num_entries + 1));
+        dir->files = (struct udf_file_identifier *)_safe_realloc(dir->files, sizeof(dir->files[0]) * (dir->num_entries + 1));
         if (!dir->files) {
             return -1;
         }
@@ -859,7 +859,7 @@ static struct udf_dir *_read_dir_file(udfread *udf, const struct long_ad *loc)
         return NULL;
     }
 
-    data = malloc(num_blocks * UDF_BLOCK_SIZE);
+    data = (uint8_t *)malloc(num_blocks * UDF_BLOCK_SIZE);
     if (!data) {
         udf_error("out of memory\n");
         return NULL;
@@ -873,7 +873,7 @@ static struct udf_dir *_read_dir_file(udfread *udf, const struct long_ad *loc)
 
     udf_trace("directory size %u bytes\n", loc->length);
 
-    dir = calloc(1, sizeof(struct udf_dir));
+    dir = (struct udf_dir *)calloc(1, sizeof(struct udf_dir));
     if (dir) {
         if (_parse_dir(data, loc->length, dir) < 0) {
             _free_dir(&dir);
@@ -902,7 +902,7 @@ static struct udf_dir *_read_dir(udfread *udf, const struct long_ad *icb)
     }
 
     if (fe->content_inline) {
-        dir = calloc(1, sizeof(struct udf_dir));
+        dir = (struct udf_dir *)calloc(1, sizeof(struct udf_dir));
         if (dir) {
             if (_parse_dir(&fe->data.content[0], fe->length, dir) < 0) {
                 udf_error("failed parsing inline directory file\n");
@@ -969,7 +969,7 @@ static struct udf_dir *_read_subdir(udfread *udf, struct udf_dir *dir, uint32_t 
     }
 
     if (!dir->subdirs) {
-        struct udf_dir **subdirs = calloc(sizeof(struct udf_dir *), dir->num_entries);
+        struct udf_dir **subdirs = (struct udf_dir **)calloc(sizeof(struct udf_dir *), dir->num_entries);
         if (!subdirs) {
             udf_error("out of memory\n");
             return NULL;
@@ -1193,7 +1193,7 @@ UDFDIR *udfread_opendir(udfread *udf, const char *path)
         return NULL;
     }
 
-    result = calloc(1, sizeof(UDFDIR));
+    result = (UDFDIR *)calloc(1, sizeof(UDFDIR));
     if (result) {
         result->dir = dir;
     }
@@ -1285,7 +1285,7 @@ UDFFILE *udfread_file_open(udfread *udf, const char *path)
         return NULL;
     }
 
-    result = calloc(1, sizeof(UDFFILE));
+    result = (UDFFILE *)calloc(1, sizeof(UDFFILE));
     if (!result) {
         free_file_entry(&fe);
         return NULL;
@@ -1427,7 +1427,7 @@ static ssize_t _read(UDFFILE *p, void *buf, size_t bytes)
 
 ssize_t udfread_file_read(UDFFILE *p, void *buf, size_t bytes)
 {
-    uint8_t *bufpt = buf;
+    uint8_t *bufpt = (uint8_t *)buf;
 
     /* sanity checks */
     if (!p || !buf || p->pos < 0) {

@@ -42,12 +42,12 @@ static int _lsdir(udfread *udf, const char *path)
 
         if (dirent.d_type == UDF_DT_DIR) {
             printf("\t\t %s%s\n", path, dirent.d_name);
-            char *next_dir = malloc(strlen(path) + strlen(dirent.d_name) + 2);
+            char *next_dir = (char*)malloc(strlen(path) + strlen(dirent.d_name) + 2);
             sprintf(next_dir, "%s%s/",  path, dirent.d_name);
             _lsdir(udf, next_dir);
             free(next_dir);
         } else {
-            char *file = malloc(strlen(path) + strlen(dirent.d_name) + 1);
+            char *file = (char*)malloc(strlen(path) + strlen(dirent.d_name) + 1);
             sprintf(file, "%s%s",  path, dirent.d_name);
             UDFFILE *fp = udfread_file_open(udf, file);
             printf("%16" PRId64 " %s%s\n",  udfread_file_size(fp), path, dirent.d_name);
