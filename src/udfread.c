@@ -1048,6 +1048,9 @@ static int _find_file(udfread *udf, const char *path,
         } else if (token) {
             udf_log("_find_file: entry %s not found (parent is file, not directory)\n", token);
             goto error;
+        } else {
+            // found a file, make sure we won't return directory data
+            current_dir = NULL;
         }
     }
 
