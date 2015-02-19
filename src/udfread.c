@@ -1196,6 +1196,10 @@ UDFDIR *udfread_opendir(udfread *udf, const char *path)
         return NULL;
     }
 
+    if (!dir) {
+        return NULL;
+    }
+
     result = (UDFDIR *)calloc(1, sizeof(UDFDIR));
     if (result) {
         result->dir = dir;
@@ -1208,7 +1212,7 @@ struct udfread_dirent *udfread_readdir(UDFDIR *p, struct udfread_dirent *entry)
 {
     const struct udf_file_identifier *fe;
 
-    if (!p || !entry) {
+    if (!p || !entry || !p->dir) {
         return NULL;
     }
 
