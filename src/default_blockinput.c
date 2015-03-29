@@ -26,6 +26,7 @@
 #include "default_blockinput.h"
 #include "blockinput.h"
 
+#include <errno.h>
 #include <stdlib.h>
 #include <stdlib.h>
 #ifdef HAVE_UNISTD_H
@@ -113,6 +114,9 @@ static int _def_read(udfread_block_input *p_gen, uint32_t lba, void *buf, uint32
         ssize_t ret = pread(p->fd, ((char*)buf) + got, bytes - got, pos + got);
 
         if (ret <= 0) {
+            if (ret < 0 && errno == EINTR) {
+                continue;
+            }
             if (got < UDF_BLOCK_SIZE) {
                 return ret;
             }
