@@ -1089,7 +1089,7 @@ int udfread_open_input(udfread *udf, udfread_block_input *input/*, int partition
     struct volume_descriptor_set vds;
     struct long_ad fsd_location;
 
-    if (!udf || !input) {
+    if (!udf || !input || !input->read) {
         return -1;
     }
 
