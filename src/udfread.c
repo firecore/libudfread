@@ -1140,7 +1140,9 @@ int udfread_open(udfread *udf, const char *path)
 
     result = udfread_open_input(udf, input);
     if (result < 0) {
-        input->close(input);
+        if (input->close) {
+            input->close(input);
+        }
     }
 
     return result;
@@ -1150,7 +1152,9 @@ void udfread_close(udfread *udf)
 {
     if (udf) {
         if (udf->input) {
-            udf->input->close(udf->input);
+            if (udf->input->close) {
+                udf->input->close(udf->input);
+            }
             udf->input = NULL;
         }
 
