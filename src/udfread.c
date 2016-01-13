@@ -1405,20 +1405,20 @@ uint32_t udfread_read_blocks(UDFFILE *p, void *buf, uint32_t file_block, uint32_
 static ssize_t _read(UDFFILE *p, void *buf, size_t bytes)
 {
     /* start from middle of block ? */
-    int64_t pos_off = p->pos % UDF_BLOCK_SIZE;
+    size_t pos_off = p->pos % UDF_BLOCK_SIZE;
     if (pos_off) {
-        int64_t chunk_size = UDF_BLOCK_SIZE - pos_off;
+        size_t chunk_size = UDF_BLOCK_SIZE - pos_off;
         if (!p->block_valid) {
             if (udfread_read_blocks(p, p->block, p->pos / UDF_BLOCK_SIZE, 1, 0) != 1) {
                 return -1;
             }
             p->block_valid = 1;
         }
-        if (chunk_size > (int64_t)bytes) {
+        if (chunk_size > bytes) {
             chunk_size = bytes;
         }
         memcpy(buf, p->block + pos_off, chunk_size);
-        p->pos += chunk_size;
+        p->pos += (int64_t)chunk_size;
         return chunk_size;
     }
 
@@ -1478,7 +1478,7 @@ ssize_t udfread_file_read(UDFFILE *p, void *buf, size_t bytes)
 
     /* read chunks */
     while (bytes > 0) {
-        int64_t r = _read(p, bufpt, bytes);
+        ssize_t r = _read(p, bufpt, bytes);
         if (r < 0) {
             if (bufpt != buf) {
                 /* got some bytes */
