@@ -60,6 +60,7 @@ static ssize_t pread(int fd, void *buf, size_t count, off_t offset)
         return -1;
     }
 
+    memset(&ov, 0, sizeof(ov));
     ov.Offset     = offset;
     ov.OffsetHigh = (offset >> 32);
     if (!ReadFile(handle, buf, count, &got, &ov)) {
