@@ -38,6 +38,9 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#ifndef HAVE_UNISTD_H
+#include <stdio.h>
+#endif
 #include <io.h>
 #endif
 
