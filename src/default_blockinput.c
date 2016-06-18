@@ -109,11 +109,11 @@ static uint32_t _def_size(udfread_block_input *p_gen)
 
 static int _def_read(udfread_block_input *p_gen, uint32_t lba, void *buf, uint32_t nblocks, int flags)
 {
-    (void)flags;
     default_block_input *p = (default_block_input *)p_gen;
-
     size_t bytes, got;
     off_t  pos;
+
+    (void)flags;
 
     bytes = (size_t)nblocks * UDF_BLOCK_SIZE;
     got   = 0;

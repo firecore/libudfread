@@ -122,6 +122,8 @@ void decode_partition(const uint8_t *p, struct partition_descriptor *pd)
 /* Logical Volume Descriptor (ECMA 167 3/10.6) */
 void decode_logical_volume(const uint8_t *p, struct logical_volume_descriptor *lvd)
 {
+    size_t map_size;
+
     lvd->block_size = _get_u32(p + 212);
 
     decode_entity_id(p + 216, &lvd->domain_id);
@@ -132,7 +134,7 @@ void decode_logical_volume(const uint8_t *p, struct logical_volume_descriptor *l
     lvd->num_partition_maps         = _get_u32(p + 268);
 
     /* XXX cut long maps */
-    uint32_t map_size = lvd->partition_map_lable_length;
+    map_size = lvd->partition_map_lable_length;
     if (map_size > sizeof(lvd->partition_map_table)) {
         map_size = sizeof(lvd->partition_map_table);
     }
