@@ -272,7 +272,7 @@ static struct file_entry *_decode_file_entry(const uint8_t *p, size_t size,
             return NULL;
     }
 
-    if (content_inline) {
+    if (num_ad < 1) {
         fe = (struct file_entry *)calloc(1, sizeof(struct file_entry) + l_ad);
     } else {
         fe = (struct file_entry *)calloc(1, sizeof(struct file_entry) + sizeof(struct long_ad) * (num_ad - 1));
