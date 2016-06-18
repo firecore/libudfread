@@ -37,11 +37,18 @@
  */
 
 /* fixed-length dstring, ECMA 1/7.2.12 */
-static int _decode_dstring(const uint8_t *p, int field_length, uint8_t *str)
+static size_t _decode_dstring(const uint8_t *p, size_t field_length, uint8_t *str)
 {
-    int length = _get_u8(p + field_length - 1);
-    if (length > field_length - 1) {
-        length = field_length - 1;
+    size_t length;
+
+    if (field_length < 1) {
+        return 0;
+    }
+    field_length--;
+
+    length = _get_u8(p + field_length);
+    if (length > field_length) {
+        length = field_length;
     }
     memcpy(str, p, length);
     return length;
