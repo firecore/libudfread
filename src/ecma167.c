@@ -155,7 +155,7 @@ void decode_file_set_descriptor(const uint8_t *p, struct file_set_descriptor *fs
 /* File Identifier (ECMA 167 4/14.4) */
 size_t decode_file_identifier(const uint8_t *p, struct file_identifier *fi)
 {
-    uint16_t       l_iu; /* length of implementation use field */
+    size_t l_iu; /* length of implementation use field */
 
     fi->characteristic = _get_u8(p + 18);
     fi->filename_len   = _get_u8(p + 19);
@@ -172,7 +172,7 @@ size_t decode_file_identifier(const uint8_t *p, struct file_identifier *fi)
      * padding size 4 * ip((L_FI+L_IU+38+3)/4) - (L_FI+L_IU+38)
      * => padded to dwords
      */
-    return 4 * ((38 + fi->filename_len + l_iu + 3) / 4);
+    return 4 * ((38 + (size_t)fi->filename_len + l_iu + 3) / 4);
 }
 
 /* ICB Tag (ECMA 167 4/14.6) */
@@ -244,7 +244,7 @@ static struct file_entry *_decode_file_entry(const uint8_t *p, size_t size,
 {
     struct file_entry *fe;
     struct icb_tag     tag;
-    int                num_ad;
+    uint32_t           num_ad;
     int                content_inline = 0;
 
     if (p_ad + l_ad > size) {
