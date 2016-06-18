@@ -1339,21 +1339,13 @@ void udfread_file_close(UDFFILE *p)
  * block access
  */
 
-uint32_t udfread_file_lba(UDFFILE *p, uint32_t file_block)
+static uint32_t _file_lba(UDFFILE *p, uint32_t file_block)
 {
     const struct file_entry *fe;
     unsigned int i;
     uint32_t     ad_size;
 
-    if (!p) {
-        return 0;
-    }
-
     fe = p->fe;
-    if (fe->content_inline) {
-        udf_error("can't map lba for inline file\n");
-        return 0;
-    }
 
     for (i = 0; i < fe->num_ad; i++) {
         const struct long_ad *ad = &fe->data.ad[0];
@@ -1384,16 +1376,43 @@ uint32_t udfread_file_lba(UDFFILE *p, uint32_t file_block)
     return 0;
 }
 
+static int _file_lba_exists(UDFFILE *p)
+{
+    if (!p) {
+        return 0;
+    }
+
+    if (p->fe->content_inline) {
+        udf_error("can't map lba for inline file\n");
+        return 0;
+    }
+
+    return 1;
+}
+
+uint32_t udfread_file_lba(UDFFILE *p, uint32_t file_block)
+{
+    if (!_file_lba_exists(p)) {
+        return 0;
+    }
+
+    return _file_lba(p, file_block);
+}
+
 uint32_t udfread_read_blocks(UDFFILE *p, void *buf, uint32_t file_block, uint32_t num_blocks, int flags)
 {
     uint32_t i;
 
-    if (!p || !num_blocks || !buf) {
+    if (!num_blocks || !buf) {
+        return 0;
+    }
+
+    if (!_file_lba_exists(p)) {
         return 0;
     }
 
     for (i = 0; i < num_blocks; i++) {
-        uint32_t lba = udfread_file_lba(p, file_block + i);
+        uint32_t lba = _file_lba(p, file_block + i);
         uint8_t *block = (uint8_t *)buf + UDF_BLOCK_SIZE * i;
         udf_trace("map block %u to lba %u\n", file_block + i, lba);
         if (!lba) {
