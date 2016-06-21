@@ -1359,6 +1359,14 @@ uint32_t udfread_file_lba(UDFFILE *p, uint32_t file_block)
         const struct long_ad *ad = &fe->data.ad[0];
         ad_size = (ad[i].length + UDF_BLOCK_SIZE - 1) / UDF_BLOCK_SIZE;
         if (file_block < ad_size) {
+
+            if (ad[i].extent_type != ECMA_AD_EXTENT_NORMAL) {
+                if (ad[i].extent_type == ECMA_AD_EXTENT_AD) {
+                    udf_error("unsupported allocation desriptor: extent type %u\n", ad[i].extent_type);
+                }
+                return 0;
+            }
+
             if (!ad[i].lba) {
                 /* empty file / no allocated space */
                 return 0;

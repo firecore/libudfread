@@ -72,8 +72,6 @@ void decode_entity_id(const uint8_t *p, struct entity_id *eid)
  * Part 3: Volume Structure
  */
 
-#define AD_LENGTH_MASK    0x3fffffff
-
 /* Descriptor Tag (ECMA 167, 3/7.2) */
 enum tag_identifier decode_descriptor_tag(const uint8_t *buf)
 {
@@ -197,10 +195,17 @@ static void _decode_icb_tag(const uint8_t *p, struct icb_tag *tag)
     tag->flags         = _get_u16(p + 18);
 }
 
+/* Allocation Descriptors */
+
+#define AD_LENGTH_MASK    0x3fffffff
+#define AD_TYPE(length)  ((length) >> 30)
+
 /* Short Allocation Descriptor (ECMA 167, 4/14.14.1) */
 static void _decode_short_ad(const uint8_t *buf, uint16_t partition, struct long_ad *ad)
 {
-    ad->length    = _get_u32(buf + 0) & AD_LENGTH_MASK;
+    uint32_t u32 = _get_u32(buf + 0);
+    ad->extent_type = AD_TYPE(u32);
+    ad->length    = u32 & AD_LENGTH_MASK;
     ad->lba       = _get_u32(buf + 4);
     ad->partition = partition;
 }
@@ -208,7 +213,9 @@ static void _decode_short_ad(const uint8_t *buf, uint16_t partition, struct long
 /* Long Allocation Descriptor (ECMA 167, 4/14.14.2) */
 void decode_long_ad(const uint8_t *buf, struct long_ad *ad)
 {
-    ad->length    = _get_u32(buf + 0) & AD_LENGTH_MASK;
+    uint32_t u32 = _get_u32(buf + 0);
+    ad->extent_type = AD_TYPE(u32);
+    ad->length    = u32 & AD_LENGTH_MASK;
     ad->lba       = _get_u32(buf + 4);
     ad->partition = _get_u16(buf + 8);
 }
@@ -216,7 +223,9 @@ void decode_long_ad(const uint8_t *buf, struct long_ad *ad)
 /* Exrtended Allocation Descriptor (ECMA 167, 4/14.14.3) */
 static void _decode_extended_ad(const uint8_t *buf, struct long_ad *ad)
 {
-    ad->length    = _get_u32(buf + 0) & AD_LENGTH_MASK;
+    uint32_t u32 = _get_u32(buf + 0);
+    ad->extent_type = AD_TYPE(u32);
+    ad->length    = u32 & AD_LENGTH_MASK;
     ad->lba       = _get_u32(buf + 12);
     ad->partition = _get_u16(buf + 16);
 }
