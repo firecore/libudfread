@@ -771,15 +771,11 @@ static int _read_metadata_blocks(udfread *udf, uint8_t *buf,
     return tag_id;
 }
 
-static struct file_entry *_read_file_entry(udfread *udf,
-                                           const struct long_ad *icb)
+static uint8_t *_read_metadata(udfread *udf, const struct long_ad *icb, int *tag_id)
 {
-    struct file_entry *fe = NULL;
     uint32_t  num_blocks = (icb->length + UDF_BLOCK_SIZE - 1) / UDF_BLOCK_SIZE;
     uint8_t  *buf;
-    int       tag_id;
 
-    udf_trace("file entry size %u bytes\n", icb->length);
     if (num_blocks < 1) {
         return NULL;
     }
@@ -790,10 +786,28 @@ static struct file_entry *_read_file_entry(udfread *udf,
         return NULL;
     }
 
-    tag_id = _read_metadata_blocks(udf, buf, icb);
-    if (tag_id < 0) {
-        udf_error("reading file entry failed\n");
+    *tag_id = _read_metadata_blocks(udf, buf, icb);
+    if (*tag_id < 0) {
+        udf_log("reading icb blocks failed\n");
         free(buf);
+        return NULL;
+    }
+
+    return buf;
+}
+
+static struct file_entry *_read_file_entry(udfread *udf,
+                                           const struct long_ad *icb)
+{
+    struct file_entry *fe = NULL;
+    uint8_t  *buf;
+    int       tag_id;
+
+    udf_trace("file entry size %u bytes\n", icb->length);
+
+    buf = _read_metadata(udf, icb, &tag_id);
+    if (!buf) {
+        udf_error("reading file entry failed\n");
         return NULL;
     }
 
@@ -857,27 +871,17 @@ static int _parse_dir(const uint8_t *data, uint32_t length, struct udf_dir *dir)
 
 static struct udf_dir *_read_dir_file(udfread *udf, const struct long_ad *loc)
 {
-    uint32_t        num_blocks = (loc->length + UDF_BLOCK_SIZE - 1) / UDF_BLOCK_SIZE;
-    uint8_t        *data;
     struct udf_dir *dir = NULL;
-
-    if (num_blocks < 1) {
-        return NULL;
-    }
-
-    data = (uint8_t *)malloc(num_blocks * UDF_BLOCK_SIZE);
-    if (!data) {
-        udf_error("out of memory\n");
-        return NULL;
-    }
-
-    if (_read_metadata_blocks(udf, data, loc) < 0) {
-        udf_error("reading directory file failed\n");
-        free(data);
-        return NULL;
-    }
+    uint8_t        *data;
+    int             tag_id;
 
     udf_trace("directory size %u bytes\n", loc->length);
+
+    data = _read_metadata(udf, loc, &tag_id);
+    if (!data) {
+        udf_error("reading directory file failed\n");
+        return NULL;
+    }
 
     dir = (struct udf_dir *)calloc(1, sizeof(struct udf_dir));
     if (dir) {
