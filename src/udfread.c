@@ -283,7 +283,7 @@ static int _probe_volume(udfread_block_input *input)
             }
             if (!memcmp(buf, bea, sizeof(bea))) {
                 udf_trace("ECMA 167 Volume, BEA01\n");
-                bea_seen++;
+                bea_seen = 1;
             }
 
             if (bea_seen) {
