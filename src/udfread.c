@@ -1548,7 +1548,7 @@ int64_t udfread_file_seek(UDFFILE *p, int64_t pos, int whence)
                 pos += p->pos;
                 break;
             case UDF_SEEK_END:
-                pos = udfread_file_size(p) - pos;
+                pos = udfread_file_size(p) + pos;
                 break;
             case UDF_SEEK_SET:
             default:
