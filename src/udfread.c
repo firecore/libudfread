@@ -1420,7 +1420,7 @@ uint32_t udfread_read_blocks(UDFFILE *p, void *buf, uint32_t file_block, uint32_
         if (!lba) {
             /* unallocated/unwritten block or EOF */
             uint32_t file_blocks = (udfread_file_size(p) + UDF_BLOCK_SIZE - 1) / UDF_BLOCK_SIZE;
-            if (file_block + i >= file_blocks) {
+            if (file_block + i < file_blocks) {
                 udf_trace("zero-fill unallocated / unwritten block %u\n", file_block + i);
                 memset(block, 0, UDF_BLOCK_SIZE);
                 continue;
