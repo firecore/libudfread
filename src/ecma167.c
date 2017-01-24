@@ -232,23 +232,24 @@ static void _decode_extended_ad(const uint8_t *buf, struct long_ad *ad)
 
 /* File Entry */
 
-static void _decode_file_ads(const uint8_t *p, int flags, uint16_t partition, struct file_entry *fe)
+static void _decode_file_ads(const uint8_t *p, int flags, uint16_t partition,
+                             struct long_ad *ad, unsigned num_ad)
 {
     uint32_t i;
 
     flags &= 7;
-    for (i = 0; i < fe->num_ad; i++) {
+    for (i = 0; i < num_ad; i++) {
         switch (flags) {
         case 0:
-            _decode_short_ad(p, partition, &fe->data.ad[i]);
+            _decode_short_ad(p, partition, &ad[i]);
             p += 8;
             break;
         case 1:
-            decode_long_ad(p, &fe->data.ad[i]);
+            decode_long_ad(p, &ad[i]);
             p += 16;
             break;
         case 2:
-            _decode_extended_ad(p, &fe->data.ad[i]);
+            _decode_extended_ad(p, &ad[i]);
             p += 20;
             break;
         }
@@ -308,7 +309,7 @@ static struct file_entry *_decode_file_entry(const uint8_t *p, size_t size,
         fe->content_inline = 1;
         memcpy(fe->data.content, p + p_ad, l_ad);
     } else {
-        _decode_file_ads(p + p_ad, tag.flags, partition, fe);
+        _decode_file_ads(p + p_ad, tag.flags, partition, &fe->data.ad[0], num_ad);
     }
 
     return fe;
