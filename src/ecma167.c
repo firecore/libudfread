@@ -302,6 +302,7 @@ static struct file_entry *_decode_file_entry(const uint8_t *p, size_t size,
     fe->file_type = tag.file_type;
     fe->length    = _get_u64(p + 56);
     fe->num_ad    = num_ad;
+    fe->icb_flags = tag.flags;
 
     if (content_inline) {
         /* data of small files can be embedded in file entry */
@@ -313,6 +314,50 @@ static struct file_entry *_decode_file_entry(const uint8_t *p, size_t size,
     }
 
     return fe;
+}
+
+int decode_allocation_extent(struct file_entry **p_fe, const uint8_t *p, size_t size, uint16_t partition)
+{
+    struct file_entry *fe = *p_fe;
+    uint32_t l_ad, num_ad;
+
+    l_ad = _get_u32(p + 20);
+    if (size < 24 || size - 24 < l_ad) {
+        ecma_error("decode_allocation_extent: invalid allocation extent (l_ad)\n");
+        return -1;
+    }
+
+    switch (fe->icb_flags & 7) {
+        case 0: num_ad = l_ad / 8;  break;
+        case 1: num_ad = l_ad / 16; break;
+        case 2: num_ad = l_ad / 20; break;
+        default:
+            ecma_error("decode_allocation_extent: unsupported icb flags 0x%x\n", fe->icb_flags);
+            return -1;
+    }
+
+    if (num_ad < 1) {
+        ecma_error("decode_allocation_extent: empty allocation extent\n");
+        return 0;
+    }
+
+    fe = (struct file_entry *)realloc(fe, sizeof(struct file_entry) + sizeof(struct long_ad) * (fe->num_ad + num_ad - 1));
+    if (!fe) {
+        return -1;
+    }
+    *p_fe = fe;
+
+    /* drop pointer to this extent from the end of ads */
+    if (fe->data.ad[fe->num_ad - 1].extent_type != ECMA_AD_EXTENT_AD) {
+        ecma_error("decode_allocation_extent: missing link ad\n");
+    }
+    fe->num_ad--;
+
+    /* decode new allocation descriptors */
+    _decode_file_ads(p + 24, fe->icb_flags, partition, &fe->data.ad[fe->num_ad], num_ad);
+    fe->num_ad += num_ad;
+
+    return 0;
 }
 
 /* File Entry (ECMA 167, 4/14.9) */

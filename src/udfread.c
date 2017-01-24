@@ -824,6 +824,39 @@ static struct file_entry *_read_file_entry(udfread *udf,
     }
 
     free(buf);
+
+    /* read possible additional allocation extents */
+    if (fe && fe->num_ad > 0) {
+        while (fe->data.ad[fe->num_ad - 1].extent_type == ECMA_AD_EXTENT_AD) {
+
+            icb = &fe->data.ad[fe->num_ad - 1];
+            udf_log("_read_file_entry: reading allocation extent @%u\n", icb->lba);
+
+            buf = _read_metadata(udf, icb, &tag_id);
+            if (!buf) {
+                udf_error("_read_file_entry: reading allocation extent @%u failed\n", icb->lba);
+                break;
+            }
+
+            if (tag_id != ECMA_AllocationExtentDescriptor) {
+                free(buf);
+                udf_error("_read_file_entry: unexpected tag %u (expected ECMA_AllocationExtentDescriptor)\n", tag_id);
+                break;
+            }
+
+            if (decode_allocation_extent(&fe, buf, icb->length, icb->partition) < 0) {
+                free(buf);
+                udf_error("_read_file_entry: decode_allocation_extent() failed\n");
+                break;
+            }
+
+            /* failure before this point will cause an error when reading the file past extent point.
+               (extent ad is left in file ad list). */
+
+            free(buf);
+        }
+    }
+
     return fe;
 }
 
