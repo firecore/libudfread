@@ -1391,7 +1391,7 @@ static uint32_t _file_lba(UDFFILE *p, uint32_t file_block)
 
             if (ad[i].extent_type != ECMA_AD_EXTENT_NORMAL) {
                 if (ad[i].extent_type == ECMA_AD_EXTENT_AD) {
-                    udf_error("unsupported allocation desriptor: extent type %u\n", ad[i].extent_type);
+                    udf_error("unsupported allocation descriptor: extent type %u\n", ad[i].extent_type);
                 }
                 return 0;
             }
