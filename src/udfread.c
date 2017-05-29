@@ -140,7 +140,7 @@ static void *_safe_realloc(void *p, size_t s)
 #define utf16lo_to_utf8(out, out_pos, out_size, ch) \
   do {                                              \
     if (ch < 0x80) {                                \
-      out[out_pos++] = ch;                          \
+      out[out_pos++] = (uint8_t)ch;                 \
     } else {                                        \
       out_size++;                                   \
       out = (uint8_t *)_safe_realloc(out, out_size);\
@@ -1481,12 +1481,16 @@ uint32_t udfread_read_blocks(UDFFILE *p, void *buf, uint32_t file_block, uint32_
 
 static ssize_t _read(UDFFILE *p, void *buf, size_t bytes)
 {
-    /* start from middle of block ? */
+    /* start from middle of block ?
+     * maximal file size, i.e. position, is 2^32 * block size
+     */
+
     size_t pos_off = p->pos % UDF_BLOCK_SIZE;
+    uint32_t file_block = (uint32_t)(p->pos / UDF_BLOCK_SIZE);
     if (pos_off) {
         size_t chunk_size = UDF_BLOCK_SIZE - pos_off;
         if (!p->block_valid) {
-            if (udfread_read_blocks(p, p->block, p->pos / UDF_BLOCK_SIZE, 1, 0) != 1) {
+            if (udfread_read_blocks(p, p->block, file_block, 1, 0) != 1) {
                 return -1;
             }
             p->block_valid = 1;
@@ -1502,7 +1506,7 @@ static ssize_t _read(UDFFILE *p, void *buf, size_t bytes)
     /* read full block(s) ? */
     if (bytes >= UDF_BLOCK_SIZE) {
         uint32_t num_blocks = bytes / UDF_BLOCK_SIZE;
-        num_blocks = udfread_read_blocks(p, buf, p->pos / UDF_BLOCK_SIZE, num_blocks, 0);
+        num_blocks = udfread_read_blocks(p, buf, file_block, num_blocks, 0);
         if (num_blocks < 1) {
             return -1;
         }
@@ -1511,7 +1515,7 @@ static ssize_t _read(UDFFILE *p, void *buf, size_t bytes)
     }
 
     /* read beginning of a block */
-    if (udfread_read_blocks(p, p->block, p->pos / UDF_BLOCK_SIZE, 1, 0) != 1) {
+    if (udfread_read_blocks(p, p->block, file_block, 1, 0) != 1) {
         return -1;
     }
     p->block_valid = 1;
