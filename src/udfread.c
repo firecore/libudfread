@@ -842,7 +842,7 @@ static struct file_entry *_read_file_entry(udfread *udf,
 
             if (tag_id != ECMA_AllocationExtentDescriptor) {
                 free(buf);
-                udf_error("_read_file_entry: unexpected tag %u (expected ECMA_AllocationExtentDescriptor)\n", tag_id);
+                udf_error("_read_file_entry: unexpected tag %d (expected ECMA_AllocationExtentDescriptor)\n", tag_id);
                 break;
             }
 
