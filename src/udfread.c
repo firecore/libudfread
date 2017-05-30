@@ -25,6 +25,7 @@
 
 #include "udfread.h"
 
+#include "udfread-version.h"
 #include "blockinput.h"
 #include "default_blockinput.h"
 #include "ecma167.h"
@@ -693,6 +694,7 @@ udfread *udfread_init(void)
         enable_log = 1;
     }
 
+    udf_log("libudfread " UDFREAD_VERSION_STRING "\n");
     return (udfread *)calloc(1, sizeof(udfread));
 }
 
