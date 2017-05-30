@@ -37,7 +37,7 @@
  */
 
 /* fixed-length dstring, ECMA 1/7.2.12 */
-static size_t _decode_dstring(const uint8_t *p, size_t field_length, uint8_t *str)
+static uint8_t _decode_dstring(const uint8_t *p, size_t field_length, uint8_t *str)
 {
     size_t length;
 
@@ -51,7 +51,7 @@ static size_t _decode_dstring(const uint8_t *p, size_t field_length, uint8_t *st
         length = field_length;
     }
     memcpy(str, p, length);
-    return length;
+    return (uint8_t)length;
 }
 
 /* Extent Descriptor (ECMA 167, 3/7.1) */
