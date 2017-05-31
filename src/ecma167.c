@@ -332,7 +332,6 @@ int decode_allocation_extent(struct file_entry **p_fe, const uint8_t *p, size_t 
         case 1: num_ad = l_ad / 16; break;
         case 2: num_ad = l_ad / 20; break;
         default:
-            ecma_error("decode_allocation_extent: unsupported icb flags 0x%x\n", fe->icb_flags);
             return -1;
     }
 
