@@ -212,7 +212,7 @@ struct file_entry {
     uint64_t       length;         /* in bytes */
     uint8_t        file_type;      /* ECMA_FT_* */
     uint8_t        content_inline; /* 1 if file data is embedded in file entry */
-    uint8_t        icb_flags;      /* used when parsing allocation extents */
+    uint8_t        ad_type;        /* from icb_flags; used when parsing allocation extents */
 
     uint32_t       num_ad;
     union {

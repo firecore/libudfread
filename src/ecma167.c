@@ -232,14 +232,13 @@ static void _decode_extended_ad(const uint8_t *buf, struct long_ad *ad)
 
 /* File Entry */
 
-static void _decode_file_ads(const uint8_t *p, int flags, uint16_t partition,
+static void _decode_file_ads(const uint8_t *p, int ad_type, uint16_t partition,
                              struct long_ad *ad, unsigned num_ad)
 {
     uint32_t i;
 
-    flags &= 7;
     for (i = 0; i < num_ad; i++) {
-        switch (flags) {
+        switch (ad_type) {
         case 0:
             _decode_short_ad(p, partition, &ad[i]);
             p += 8;
@@ -302,7 +301,7 @@ static struct file_entry *_decode_file_entry(const uint8_t *p, size_t size,
     fe->file_type = tag.file_type;
     fe->length    = _get_u64(p + 56);
     fe->num_ad    = num_ad;
-    fe->icb_flags = tag.flags;
+    fe->ad_type   = tag.flags & 7;
 
     if (content_inline) {
         /* data of small files can be embedded in file entry */
@@ -310,7 +309,7 @@ static struct file_entry *_decode_file_entry(const uint8_t *p, size_t size,
         fe->content_inline = 1;
         memcpy(fe->data.content, p + p_ad, l_ad);
     } else {
-        _decode_file_ads(p + p_ad, tag.flags, partition, &fe->data.ad[0], num_ad);
+        _decode_file_ads(p + p_ad, fe->ad_type, partition, &fe->data.ad[0], num_ad);
     }
 
     return fe;
@@ -327,7 +326,7 @@ int decode_allocation_extent(struct file_entry **p_fe, const uint8_t *p, size_t 
         return -1;
     }
 
-    switch (fe->icb_flags & 7) {
+    switch (fe->ad_type) {
         case 0: num_ad = l_ad / 8;  break;
         case 1: num_ad = l_ad / 16; break;
         case 2: num_ad = l_ad / 20; break;
@@ -353,7 +352,7 @@ int decode_allocation_extent(struct file_entry **p_fe, const uint8_t *p, size_t 
     fe->num_ad--;
 
     /* decode new allocation descriptors */
-    _decode_file_ads(p + 24, fe->icb_flags, partition, &fe->data.ad[fe->num_ad], num_ad);
+    _decode_file_ads(p + 24, fe->ad_type, partition, &fe->data.ad[fe->num_ad], num_ad);
     fe->num_ad += num_ad;
 
     return 0;
