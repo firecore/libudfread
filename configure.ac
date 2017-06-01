@@ -1,5 +1,5 @@
 dnl library version number
-m4_define([udfread_major], 0)
+m4_define([udfread_major], 1)
 m4_define([udfread_minor], 0)
 m4_define([udfread_micro], 0)
 m4_define([udfread_version],[udfread_major.udfread_minor.udfread_micro])
