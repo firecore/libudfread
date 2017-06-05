@@ -85,10 +85,10 @@ enum tag_identifier decode_descriptor_tag(const uint8_t *buf)
 
   /* calculate tag checksum */
   for (i = 0; i < 4; i++) {
-      checksum += buf[i];
+      checksum = (uint8_t)(checksum + buf[i]);
   }
   for (i = 5; i < 16; i++) {
-      checksum += buf[i];
+      checksum = (uint8_t)(checksum + buf[i]);
   }
 
   if (checksum != buf[4]) {
