@@ -509,7 +509,11 @@ static int _map_metadata_partition(udfread_block_input *input,
             continue;
         }
 
-        if (fe->file_type == UDF_FT_METADATA) {
+        if (fe->content_inline) {
+            udf_error("invalid metadata file (content inline)\n");
+        } else if (!fe->num_ad) {
+            udf_error("invalid metadata file (no allocation descriptors)\n");
+        } else if (fe->file_type == UDF_FT_METADATA) {
             part->p[1].lba = pd->start_block + fe->data.ad[0].lba;
             udf_log("metadata file at lba %u\n", part->p[1].lba);
         } else if (fe->file_type == UDF_FT_METADATA_MIRROR) {
