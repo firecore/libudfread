@@ -96,6 +96,8 @@ AC_SUBST(UDFREAD_VERSION_MINOR)
 UDFREAD_VERSION_MICRO=udfread_micro()
 AC_SUBST(UDFREAD_VERSION_MICRO)
 
+AC_DEFINE([HAVE_UDFREAD_VERSION_H], 1, ["Define to 1 if you have udfread-version.h header file."])
+
 dnl export library (.so) version
 UDFREAD_LTVERSION="lt_current():lt_revision():lt_age()"
 AC_SUBST(UDFREAD_LTVERSION)
