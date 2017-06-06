@@ -28,3 +28,5 @@
 .dirstamp
 .deps
 .libs
+udfcat
+udfls
