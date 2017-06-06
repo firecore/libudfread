@@ -838,8 +838,9 @@ static struct file_entry *_read_file_entry(udfread *udf,
     free(buf);
 
     /* read possible additional allocation extents */
-    if (fe && fe->num_ad > 0) {
-        while (fe->data.ad[fe->num_ad - 1].extent_type == ECMA_AD_EXTENT_AD) {
+    if (fe) {
+        while (fe->num_ad > 0 &&
+               fe->data.ad[fe->num_ad - 1].extent_type == ECMA_AD_EXTENT_AD) {
 
             icb = &fe->data.ad[fe->num_ad - 1];
             udf_log("_read_file_entry: reading allocation extent @%u\n", icb->lba);
